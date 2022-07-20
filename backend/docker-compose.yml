@@ -1,0 +1,54 @@
+version: "3"
+
+services:
+  mysql:
+    image: yobasystems/alpine-mariadb:10.4.13
+    container_name: xxx-mysql
+    networks:
+      - xxx
+    volumes:
+      - "./mysql/logs:/var/log/mysql"
+      - "./mysql/data:/var/lib/mysql"
+      - "./mysql/sql:/docker-entrypoint-initdb.d"
+    command: [
+      '--character-set-server=utf8mb4',
+      '--collation-server=utf8mb4_unicode_ci'
+    ]
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    restart: always
+
+  redis:
+    image: redis:6.0.6-alpine
+    container_name: xxx-redis
+    networks:
+      - xxx
+    volumes:
+      - "./redis/data:/data"
+    command: redis-server --requirepass "${REDIS_PASSWORD}" --appendonly yes
+    restart: always
+
+  java:
+    image: xxx:1.0.0
+    build: ./java
+    command: [
+      '--jasypt.encryptor.password=${JASYPT_PASSWORD}'
+    ]
+    container_name: xxx-java
+    expose:
+      - 8080
+    networks:
+      - xxx
+    volumes:
+      - "./java/logs:/logs"
+      - "../images:/root/upload/images"  
+    depends_on:
+      - mysql
+      - redis
+    restart: always
+
+
+networks: 
+  xxx:
+    external: true

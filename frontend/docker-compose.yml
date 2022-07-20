@@ -1,0 +1,21 @@
+version: '3.6'
+services:
+
+  nginx:
+    image: nginx:${NGINX_VERSION}
+    container_name: xxx-nginx
+    ports:
+      - '90xx:80'
+    networks:
+      - xxx
+    volumes:
+      - ${NGINX_CONF_DIR:-./conf}:/etc/nginx/conf.d
+      - ${NGINX_LOG_DIR:-./logs}:/var/log/nginx
+      - ${NGINX_DATA_DIR:-./html}:/usr/share/nginx/html
+      - ${NGINX_IMAGE_DATA_DIR}:/usr/share/nginx/images
+    restart: always
+
+networks:
+  xxx:
+    external: true
+
